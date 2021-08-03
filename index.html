@@ -1,4 +1,4 @@
-﻿<html>
+<html>
 <head>
     <meta charset="utf-8">
     <title></title>
@@ -6,8 +6,8 @@
     <style>
         body{
             background: #000;
+            overflow-y: hidden;
         }
-
         .magnite {
             display: inline-block;
             height: 20px;
@@ -19,36 +19,6 @@
                 border-style: dashed;solid;*/
             border: 2px dashed #F00;
         }
-
-        /*input[type=range] {
-            border-radius: 3px;
-            background: #ffffff;
-        }*/
-
-        input[type=range] {
-            -webkit-appearance: none;
-            border-radius: 6px;
-            margin: 50px;
-            width: 20%;
-            height: 15px;
-            cursor: pointer;
-            border-radius: 0px;
-            background: #000;
-            overflow: hidden;
-        }
-
-            input[type=range]:focus {
-                outline: none;
-            }
-
-        input[type='range']::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 10px;
-            height: 10px;   
-            background: #FFF;
-            border-radius: 0px;
-            box-shadow: -180px 0 0 180px #555;
-        }
     </style>
 </head>
 <body>
@@ -59,11 +29,8 @@
     <div id="dir" class="magnite">Random</div>
     <br />
     <br />
-    <input type="range" id="slider1" class="slider1" min="0" max="100" step="1" value="50"/>
     <script>
         var canvas = document.getElementById("canvas");
-        canvas.width = 1000; // задаём размеры холста
-        canvas.height = 500;
         var context = canvas.getContext("2d");
 
         var mag = document.getElementById("magnite");
@@ -82,151 +49,108 @@
         var px = 0;
         var py = 0;
 
+        var isMouseDown = false;
+
         function init() {
             context.fillStyle = "#000";
-            context.fillRect(0, 0, 1000, 500);
+            context.fillRect(0, 0,  canvas.width, canvas.height);
             setInterval(go, 1000 / 50);
         }
         init();
 
         var colorH = 0;
 
+        var cw = canvas.width;
+        var ch = canvas.height;
+
         function go() {
-            context.fillStyle = 'rgba(0, 0, 0, 0.4)';
-            context.fillRect(0, 0, 1000, 500);
+            if(isMouseDown) {
+                var step = 5;
+                if (dir) {
+                    direction = Math.random() * Math.PI*2.0;
+                } else {
+                    direction += Math.PI/10;
+                }
+                createPoint(px, py, step * Math.sin(direction), step * Math.cos(direction));
+            }
+
+            if(cw != document.body.offsetWidth || ch != document.body.offsetHeight * 0.8) {
+                canvas.width = cw = document.body.offsetWidth;
+                canvas.height = ch = document.body.offsetHeight * 0.8;
+                context.fillStyle = "#000";
+                context.fillRect(0, 0,  canvas.width, canvas.height);
+            }
+            context.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            context.fillRect(0, 0, canvas.width, canvas.height);
 
 
-            for (i = 0; i < colors.length; i++) {
-
-                // if (colors[0] < 15) {
-                /*
-        colors.shift();
-        y.shift();
-        x.shift();
-        vx.shift();
-        vy.shift();*/
-                // }
-                context.fillStyle = 'hsl(' + colorH % 360 + ', 100%, ' + Math.round(colors[i]) + '%)';//rgb(colors[i], colors[i], colors[i]);
+            for (var i = 0; i < colors.length; ++i) {
+                context.fillStyle = 'hsl(' + colorH % 360 + ', 100%, ' + Math.round(colors[i]) + '%)'; 
                 if (stoptime) {
                     context.beginPath();
                     context.arc(x[i], y[i], 2.5, 0, 2 * Math.PI, false);
                     context.fill();
                     context.lineWidth = 5;
-                    context.strokeStyle = 'hsla(' + colorH % 360 + ', 100%, ' + Math.round(colors[i]) + '%, 0.2)';//rgb(colors[i], colors[i], colors[i]);
+                    context.strokeStyle = 'hsla(' + colorH % 360 + ', 100%, ' + Math.round(colors[i]) + '%, 0.2)';
                     context.stroke();
                     if (magnite) {
                         var nx = x[i] - px;
                         var ny = y[i] - py;
                         var size = Math.sqrt((nx * nx) + (ny * ny));
-                        console.log("S: " + size);
-                        // document.getElementById('text').text = "" + size;
                         if (size < 300) {
-                            //  size = 3 / (size-300);//(300 - );
-                            size = Math.abs(size - 300) / 5000;//(300 - );
+                            size = Math.abs(size - 300) / 5000;
                             size++;
                             x[i] = ((x[i] - px) / size) + px;
                             y[i] = ((y[i] - py) / size) + py;
-                            // size = 100 / (300 - size);
-                            //  x[i] = ((x[i] - px) / size) + px;
-                            // y[i] = ((y[i] - py) / size) + py;
                         }
                     }
                 } else {
-                    if (colors[i] < 0) {
-                        colors.splice(i, i + 1); //var r1 =
-                        y.splice(i, i + 1); //var r2 =
-                        x.splice(i, i + 1);// var r3 =
-                        vx.splice(i, i + 1);// var r4 =
-                        vy.splice(i, i + 1);//var r5 =
-                    }
                     context.fillRect(x[i], y[i], 5, 5);
                     x[i] += vx[i];
                     y[i] += vy[i];
                     colors[i] -= 0.5;
                     vy[i] += 0.5; 
                 }
-                if (y[i] > 500) {
+                if (y[i] > canvas.height) {
                     y[i] -= vy[i];
                     vy[i] = vy[i] * -0.8;
                 }
-                if (x[i] > 1000 || x[i] < 0) {
+                if (x[i] > canvas.width || x[i] < 0) {
                     x[i] -= vx[i];
                     vx[i] = vx[i] * -0.8;
+                }
+                if (colors[i] < 0) {
+                    colors.splice(i, 1); 
+                    y.splice(i, 1);
+                    x.splice(i, 1);
+                    vx.splice(i, 1);
+                    vy.splice(i, 1);
                 }
             }
 
             context.fillStyle = 'hsl(' + colorH % 360 + ', 100%, 50%)';
-            context.fillRect(0, 0, 1000, 5);
-            context.fillRect(0, 0, 5, 500);
-            context.fillRect(0, 495, 1000, 5);
-            context.fillRect(995, 0, 5, 500);
+            context.fillRect(0, 0, canvas.width, 5);
+            context.fillRect(0, 0, 5, canvas.height);
+            context.fillRect(0, canvas.height-5, canvas.width, 5);
+            context.fillRect(canvas.width-5, 0, 5, canvas.height);
+
+            context.fillText(colors.length, 10, 20);
 
             mag.style.borderColor = 'hsl(' + colorH % 360 + ', 100%, 50%)';
             mag.style.color = 'hsl(' + colorH % 360 + ', 100%, 50%)';
             if (magnite) {
                 mag.style.background = 'hsl(' + colorH % 360 + ', 100%, 25%)';
-                //mag.style.boxShadow = "1px 1px 3px #14233d"
             } else {
                 mag.style.background = "#000";
-                //mag.style.color = "#000"
             }
 
             dir2.style.borderColor = 'hsl(' + colorH % 360 + ', 100%, 50%)';
             dir2.style.color = 'hsl(' + colorH % 360 + ', 100%, 50%)';
-           if (dir) {
+            if (dir) {
                 dir2.style.background = 'hsl(' + colorH % 360 + ', 100%, 25%)';
-               //mag.style.boxShadow = "1px 1px 3px #14233d"
             } else {
                 dir2.style.background = "#000";
-                //mag.style.color = "#000"
             }
-        /*
-         * 
-         *   input[type=range] {
-            -webkit-appearance: none;
-            border-radius: 6px;
-            margin: 50px;
-            width: 20%;
-            height: 15px;
-            cursor: pointer;
-            border-radius: 0px;
-            border: 4px solid #F00;
-            background: #000;
-            overflow: hidden;
-        }
-
-            input[type=range]:focus {
-                outline: none;
-            }
-
-        input[type='range']::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 10px;
-            height: 10px;
-            background: #F00;
-            border-radius: 0px;
-            box-shadow: -180px 0 0 180px #500;
-        }
-         */
-            const converted = {
-                "input[type='range']::-webkit-slider-thumb": {
-                    WebkitAppearance: "none",
-                    width: "10px",
-                    height: "10px",
-                    background: "#FF0",
-                    borderRadius: "0px",
-                    boxShadow: "-180px 0 0 180px #5F0"
-                }
-            };
-
-
-
-            //slider1.style.border = "4px solid hsl(" + colorH % 360 + ", 100%, 50%)";
-            //slider1.style.inputTypeRangeWebkitSliderThumbElement.background = "hsl(" + colorH % 360 + ", 100 %, 50 %)";
-            //slider1.style = converted;//"input[type=range] { border: 4px solid hsl(" + colorH % 360 + ", 100%, 50%); }";//'-180px 0 0 180px hsl(' + colorH % 360 + ', 100%, 50%)';
-            ///var test = document.styleSheets[0];
-            ///console.log(test);
-            //slider1.insertRule('input[type=range]::-moz-range-thumb { background: hsl(' + colorH % 360 + ', 100%, 50%) }', stylesheet.cssRules.length);
             colorH += 1;
         }
 
@@ -236,39 +160,76 @@
             if (e.keyCode == 'Y'.charCodeAt()) {
                 stoptime = !stoptime;
             }
+            if (e.keyCode == 'R'.charCodeAt()) {
+                console.log("R");
+                let rx = Math.random()*canvas.width;
+                let ry = Math.random()*canvas.height;
+                for (var i = 0; i < 25; i++) {
+                    let d = Math.random() * Math.PI*2.0;
+                    createPoint(rx, ry, 5*Math.cos(d), 5*Math.sin(d));
+                }
+            }
+            if (e.keyCode == 'T'.charCodeAt()) {
+                console.log("T");
+                let rx = Math.random()*canvas.width;
+                let ry = Math.random()*canvas.height;
+                let d = 0;
+                for (var i = 0; i < 50; i++) {
+                    createPoint(rx, ry, Math.random()*2-1, -15*Math.sin(d));
+                    d += Math.PI/50;
+                }
+            }
+            if (e.keyCode == 'E'.charCodeAt()) {
+                console.log("E");
+                let rx = Math.random()*canvas.width;
+                let ry = canvas.height;
+                let d = 0;
+                for (var i = 0; i < 50; i++) {
+                    createPoint(rx, ry, Math.random()*2-1, 25*Math.sin(d));
+                    d += Math.PI/50;
+                }
+            }
         });
 
 
-        mag.onclick = function (e) { // обрабатываем касания пальцем ontouchend onclick
+        mag.onclick = function (e) {
             magnite = !magnite;
         };
-        dir2.onclick = function (e) { // обрабатываем касания пальцем ontouchend onclick
+        dir2.onclick = function (e) {
             dir = !dir;
         };
 
-        var direction = 6.3;
-        canvas.onmousemove = function drawIfPressed(e) {
+        var direction = Math.PI*2.0;
+
+        canvas.onmousedown = function mouseDown(e) {
             px = (e.pageX - canvas.offsetLeft) / 1 | 0;
             py = (e.pageY - canvas.offsetTop) / 1 | 0;
-            if (e.buttons > 0) {
+            isMouseDown = true;
+            console.log("DOWN");
+        }
+        canvas.onmouseup = function mouseDown(e) {
+            px = (e.pageX - canvas.offsetLeft) / 1 | 0;
+            py = (e.pageY - canvas.offsetTop) / 1 | 0;
+            isMouseDown = false;
+            console.log("UP");
+        }
+
+        canvas.onmousemove = function move(e) {
+            if(e.button > 0)
+                isMouseDown = true;
+            px = (e.pageX - canvas.offsetLeft) / 1 | 0;
+            py = (e.pageY - canvas.offsetTop) / 1 | 0;
+        //     if (e.buttons > 0) {
+                
+        //     }
+        }
+
+        function createPoint(px, py, pvx, pvy) {
                 x.push(px);
                 y.push(py);
-
-                var step = 5;
-
-                direction = direction % 6.3;
-                if (dir) {
-                    direction = Math.random() * 6.3;
-                } else {
-                    direction += 0.5;
-                }
-                vx.push(step * Math.sin(direction));
-                vy.push(step * Math.sin(direction - 90));
-                colors.push(50);//Math.round(25 + (Math.random() * 200)));
-                //mag.textContent = '' +  direction;
-               
-                //
-            }
+                vx.push(pvx);
+                vy.push(pvy);
+                colors.push(50);
         }
     </script>
 </body>
