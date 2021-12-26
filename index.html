@@ -6,8 +6,15 @@
     <style>
         body{
             background: #000;
-            overflow-y: hidden;
+            /*overflow-y: hidden;*/
+            user-select: none !important;
+            font-family: sans-serif;
         }
+
+        * {
+            user-select: none !important;
+        }
+
         .magnite {
             display: inline-block;
             height: 20px;
@@ -18,15 +25,22 @@
             /*transition: .25s ease-in-out;
                 border-style: dashed;solid;*/
             border: 2px dashed #F00;
+            margin-right: 20px;
+            user-select: none !important;
+        }
+
+        .buttons {
+            position: fixed;
+            bottom: 20px;
         }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
-    <br />
-    <br />
-    <div id="magnite" class="magnite">Magnite</div>
-    <div id="dir" class="magnite">Random</div>
+    <div class="buttons">
+        <div id="magnite" class="magnite">Magnite</div>
+        <div id="dir" class="magnite">Random</div>
+    </div>
     <br />
     <br />
     <script>
@@ -74,12 +88,13 @@
                 createPoint(px, py, step * Math.sin(direction), step * Math.cos(direction));
             }
 
-            if(cw != document.body.offsetWidth || ch != document.body.offsetHeight * 0.8) {
+            if(cw != document.body.offsetWidth || ch != document.body.clientHeight - 80) {
                 canvas.width = cw = document.body.offsetWidth;
-                canvas.height = ch = document.body.offsetHeight * 0.8;
+                canvas.height = ch = document.body.clientHeight - 80;
                 context.fillStyle = "#000";
                 context.fillRect(0, 0,  canvas.width, canvas.height);
             }
+
             context.fillStyle = 'rgba(0, 0, 0, 0.2)';
             context.fillRect(0, 0, canvas.width, canvas.height);
 
