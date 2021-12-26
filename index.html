@@ -88,9 +88,9 @@
                 createPoint(px, py, step * Math.sin(direction), step * Math.cos(direction));
             }
 
-            if(cw != document.body.offsetWidth || ch != document.body.clientHeight - 80) {
+            if(cw != document.body.offsetWidth || ch != window.innerHeight - 80) {
                 canvas.width = cw = document.body.offsetWidth;
-                canvas.height = ch = document.body.clientHeight - 80;
+                canvas.height = ch = window.innerHeight - 80;
                 context.fillStyle = "#000";
                 context.fillRect(0, 0,  canvas.width, canvas.height);
             }
