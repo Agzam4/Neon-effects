@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Neon Blocks</title>
+	<style type="text/css">
+		body {
+			background: #333;
+			margin: 0;
+    		overflow: hidden;
+		}
+
+		canvas {
+			background: #000;
+		}
+	</style>
+	<script type="text/javascript">
+        let canvas;
+        let g;
+        //canvas.width = 1000;
+        //canvas.height = 500;
+
+        let cw = 0;
+        let ch = 0;
+
+        let timer = 0;
+
+        let scale = 0;
+
+        let interval = 1000 / 50;
+		window.onload = function() {
+			canvas = document.getElementById("canvas");
+            setInterval(go, interval);
+
+
+        	canvas.onmousemove = function drawIfPressed(e) {
+        		push(e.offsetX, e.offsetY);
+        	}
+		}
+
+		function fixSize(w, h) {
+        	if(cw != w || ch != h) {
+                canvas.width = cw = w;
+                canvas.height = ch = h;
+                scale = h/360;
+            }
+		}
+
+
+        var x = [];
+        var y = [];
+        let color = 0;
+
+		function go() {
+
+			// fixSize(document.body.offsetWidth, window.innerHeight);
+			fixSize(document.body.clientWidth, window.innerHeight);
+
+        	g = canvas.getContext("2d");
+
+        	defaultMode();
+			g.fillStyle = "#000";
+			g.fillRect(0, 0, canvas.width, canvas.height);
+			lightMode();
+
+			g.lineJoin = "round";
+    		g.lineWidth = 5;
+
+        	let color2 = 0;
+			if(x.length > 0){
+    			g.moveTo(x[0], y[0]);
+    			let size = x.length;
+
+    			for (var l = 1; l <= lineLight; l++) {
+            		for (var i = 0; i < size-1; i++) {
+           				g.beginPath();
+    					g.lineWidth = lineWidth*i/size*lineLight/l + 1;
+    					g.moveTo(x[i-1], y[i-1]);
+    					g.lineTo(x[i], y[i]);
+    					g.strokeStyle = 'hsl(' + (color+color2) % 360 + ', 100%, ' + 100/lineLight*l + '%)';
+    					g.lineTo(x[i+1], y[i+1]);
+						color2+=360/size;
+    					g.stroke();
+            		}
+    			}
+
+    			for (var i = 2; i < starQ; i++) {
+					drawStar(x[size-1], y[size-1], 4, lineLight*1.5, lineLight*30/i, 0, 'hsl(' + color % 360 + ', 100%, ' + i*20 + '%)', null);
+    			}
+
+				if(x.length > 2){
+    				//x[size-1] = (x[size-1] - x[size-2])*0.9 + x[size-2];
+    				//y[size-1] = (y[size-1] - y[size-2])*0.9 + y[size-2];
+
+    				x[0] = (x[0] - x[1])*0.1 + x[1];
+    				y[0] = (y[0] - y[1])*0.1 + y[1];
+
+    				if(Math.round(x[0]) == Math.round(x[1])) {
+    					if(Math.round(y[0]) == Math.round(y[1])) {
+							x.shift();
+							y.shift();
+    					}
+    				}
+    			}
+        	}
+
+        	color+=5;
+
+			timer += interval;
+		}
+
+		let lineWidth = 3;
+		let trailSize = 50;
+		let lineLight = 5;
+		let starQ = 5;
+
+		function push(xx, yy) {
+			x.push(xx);
+			y.push(yy);
+			if(x.length > trailSize) {
+				x.shift();
+				y.shift();
+			}
+		}
+
+		function defaultMode() {
+			g.globalCompositeOperation = "source-over";
+		}
+
+		function lightMode() {
+			g.globalCompositeOperation = "lighter";
+		}
+
+		function drawStar(centerX, centerY, arms, innerRadius, outerRadius, startAngle,
+		fillStyle, strokeStyle, lineWidth) { 
+			startAngle = startAngle * Math.PI / 180  || 0;
+  			var step = Math.PI / arms,
+      		angle = startAngle,hyp,x,y;
+  			g.strokeStyle = strokeStyle;
+  			g.fillStyle = fillStyle;
+  			g.lineWidth = lineWidth;
+  			g.beginPath();
+  			for (var i = 0, len = 2 * arms; i < len; i++) {
+   			 	hyp = i & 1 ? innerRadius : outerRadius;
+    			x = centerX + Math.cos(angle) * hyp;
+    			y = centerY + Math.sin(angle) * hyp/1.5;
+    			angle+=step;
+    			g.lineTo(x, y);
+  			}
+  			g.closePath();
+  			fillStyle && g.fill();
+  			strokeStyle && g.stroke();
+  		}
+	</script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+</body>
+</html>
